@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowRight, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -28,6 +28,7 @@ export default function Page() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [showIframe, setShowIframe] = useState(false);
+  const yesButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +80,20 @@ export default function Page() {
     }
   }, [loading]);
 
+  useEffect(() => {
+    const handleEnterKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && document.activeElement?.tagName !== "TEXTAREA") {
+        yesButtonRef.current?.click();
+      }
+    };
+
+    document.addEventListener("keydown", handleEnterKey);
+
+    return () => {
+      document.removeEventListener("keydown", handleEnterKey);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen w-full flex">
       <div className="flex flex-col justify-end gap-5 py-5 px-2 border-r-2">
@@ -90,8 +105,13 @@ export default function Page() {
       {messages.length === 0 ? (
         // Initial landing page layout
         <div className="min-h-screen w-full bg-white flex flex-col flex-1 items-center pt-24 px-4">
-          <div className="mb-16">
-            <Image src="/Logo.png" alt="Logo" width={120} height={120} />
+          <div
+            className="mb-16 
+          flex flex-col items-center text-2xl font-bold text-gray
+          "
+          >
+            <Image src="/Logo.svg" alt="Logo" width={120} height={120} />
+            <h1>LeapFrog</h1>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8 max-w-2xl">
@@ -168,12 +188,20 @@ export default function Page() {
                         {message.content}
                       </div>
                       {message.showButtons && (
-                        <div className="flex gap-2 mt-2">
+                        <div className="flex gap-2 mt-2 ml-5">
                           <Button
                             onClick={() => setLoading(true)}
-                            className="bg-green-500 hover:bg-green-600 text-white rounded-md px-4 py-2"
+                            ref={yesButtonRef}
+                            className="bg-green-500 hover:bg-green-600 text-white rounded-md px-4 py-2 flex"
                           >
                             Yes
+                            <Image
+                              src="/arrow.svg"
+                              alt="setting"
+                              width={20}
+                              height={20}
+                              className=""
+                            />
                           </Button>
                           <Button className="bg-black hover:bg-gray-800 text-white rounded-md px-4 py-2">
                             No
@@ -202,7 +230,7 @@ export default function Page() {
                   <Button
                     type="submit"
                     size="icon"
-                    className={`absolute right-2 bottom-3 rounded-full transition-colors ${
+                    className={`absolute right-2 bottom-[0.79rem] rounded-full transition-colors ${
                       inputValue
                         ? "bg-green-500 hover:bg-green-600"
                         : "bg-[#e7e7e7] text-white cursor-not-allowed"
@@ -231,7 +259,10 @@ export default function Page() {
                 className="w-full h-full border-none"
               />
             ) : (
-              <Image src="/Logo.png" alt="Logo" width={120} height={120} />
+              <div className="mb-16 flex flex-col items-center text-2xl font-bold text-gray">
+                <Image src="/Logo.svg" alt="Logo" width={120} height={120} />
+                <h1>LeapFrog</h1>
+              </div>
             )}
           </div>
         </div>
